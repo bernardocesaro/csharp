@@ -1,0 +1,25 @@
+// Não sei se precisa
+CREATE DATABASE projeto_brainrot;
+
+CREATE TABLE conta (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE brainrot (
+	id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(50) NOT NULL,
+    raridade VARCHAR(50) NOT NULL,
+    efeito VARCHAR(200) NOT NULL
+);
+
+CREATE TABLE conta_brainrot (
+	id_conta INT,
+    id_brainrot INT,
+    quantidade_brainrot INT NOT NULL,
+    PRIMARY KEY (id_conta, id_brainrot),
+    FOREIGN KEY (id_conta) REFERENCES conta(id),
+    FOREIGN KEY (id_brainrot) REFERENCES brainrot(id)
+);
+
+SELECT id, nome FROM conta;

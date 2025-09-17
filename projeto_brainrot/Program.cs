@@ -1,4 +1,5 @@
 ﻿using System;
+using Google.Protobuf.WellKnownTypes;
 using MySql.Data.MySqlClient;
 
 class Program
@@ -13,29 +14,45 @@ class Program
             {
                 connection.Open();
                 Console.WriteLine("Conectado ao MySQL!");
+                Sql sql = new Sql();
 
-                // 1. INSERIR DADOS
-                string insertSql = "INSERT INTO conta (nome) VALUES (@nome)";
-                
-                using (var insertCommand = new MySqlCommand(insertSql, connection))
+                string[] menuOptions =
                 {
-                    insertCommand.Parameters.AddWithValue("@nome", Console.ReadLine());
-                    int rowsAffected = insertCommand.ExecuteNonQuery();
-                    Console.WriteLine($"{rowsAffected} linha(s) inserida(s)!");
-                }
-
-                // 2. LER DADOS
-                string selectSql = "SELECT id, nome FROM conta";
-                
-                using (var selectCommand = new MySqlCommand(selectSql, connection))
-                using (var reader = selectCommand.ExecuteReader())
+                    "1 - Insert dados",
+                    "2 - Select dados",
+                    "3 - Update dados",
+                    "4 - Delete dados",
+                    "5 - Sair"
+                };
+                int option = 0;
+                do
                 {
-                    Console.WriteLine("\nDados na tabela:");
-                    while (reader.Read())
+                    foreach (var menuOption in menuOptions)
                     {
-                        Console.WriteLine($"ID: {reader["id"]}, Nome: {reader["nome"]}");
+                        Console.WriteLine(menuOption);
                     }
-                }
+                    Console.Write("Escolha uma opção: ");
+                    string? optionInput = Console.ReadLine();
+
+                    Console.Clear();
+
+                    // Validar entrada
+                    if (!int.TryParse(optionInput, out option) || option < 1 || option > 5)
+                    {
+                        Console.WriteLine("Opção inválida. Tente novamente.");
+                        continue;
+                    }
+
+                    if (option == 5)
+                    {
+                        Console.WriteLine("Saindo...");
+                        Thread.Sleep(750);
+                        break;
+                    }
+
+                    sql.DecidirOpcaoTabela(option, connection);
+                    
+                } while (option != 5);
             }
             catch (Exception ex)
             {

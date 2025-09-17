@@ -1,0 +1,16 @@
+{
+  // Desliga sugestões automáticas e autocompletar no workspace
+  "editor.quickSuggestions": { "other": false, "comments": false, "strings": false },
+  "editor.suggestOnTriggerCharacters": false,
+  "editor.acceptSuggestionOnEnter": "off",
+  "editor.inlineSuggest.enabled": false,
+  "editor.tabCompletion": "off",
+  "editor.parameterHints.enabled": false,
+
+  // Opcional: reduz sugestões do C# (OmniSharp) e IntelliSense
+  "omnisharp.disableRoslynAnalyzers": true,
+  "omnisharp.enableEditorConfigSupport": false,
+
+  // Se tiver Copilot ou outras extensões, você pode desabilitá-las manualmente nas extensões
+  // Este arquivo é apenas para o workspace — reinicie o VS Code para garantir que as configurações apliquem.
+}

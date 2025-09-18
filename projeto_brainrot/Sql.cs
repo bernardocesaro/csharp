@@ -2,13 +2,62 @@ using MySql.Data.MySqlClient;
 
 public class Sql
 {
-    private List<string> tabelas { get; set; } =
-    [
-        "conta",
-        "brainrot"
-    ];
-    private List<string> campos = new List<string>();
+    private readonly string _stringConexao;
+    public Sql(string stringConexao)
+    {
+        _stringConexao = stringConexao;
+    }
 
+    public void ComandoInsert()
+    {
+        PegarEValidarTabela();
+    }
+    private string PegarEValidarTabela()
+    {
+        while (true)
+        {
+            string? tabelaEscrita = PegarTabela();
+            string? tabelaEscritaValidada = ValidarPegarTabela(tabelaEscrita);
+            if (tabelaEscritaValidada != null)
+            {
+                return tabelaEscritaValidada;
+            }
+        }
+    }
+    private string? PegarTabela()
+    {
+        Console.WriteLine($"\nDigite em qual tabela deseja fazer um INSERT: ");
+        Console.WriteLine("Tabelas disponíveis: 'conta', 'brainrot'");
+        return Console.ReadLine();
+    }
+    private string? ValidarPegarTabela(string? tabelaEscrita)
+    {
+        tabelaEscrita = tabelaEscrita == null ? null : tabelaEscrita.Trim();
+
+        if (tabelaEscrita == null || !(tabelaEscrita == "conta") || !(tabelaEscrita == "brainrot"))
+        {
+            Console.WriteLine("Erro ao digitar uma Tabela\nTabela inválida!");
+            Console.WriteLine("Digite qualquer tecla para continuar...");
+            Console.ReadKey();
+            Console.Clear();
+            return null;
+        }
+        return tabelaEscrita;
+    }
+
+    public void ComandoSelect()
+    {
+
+    }
+    public void ComandoUpdate()
+    {
+
+    }
+    public void ComandoDelete()
+    {
+        
+    }
+    /*
     public bool VerificarStringInList(List<string> tabelas, string tabelaSelecionada)
     {
         foreach (var tabela in tabelas)
@@ -70,7 +119,7 @@ public class Sql
             Console.WriteLine($"\nDigite em qual tabela deseja {significadoOpcao[1]}: ");
             Console.WriteLine("Tabelas disponíveis: 'conta', 'brainrot'");
             string? input = Console.ReadLine();
-            string? tabelaSelecionada = (input == null ? null : input.Trim());
+            string? tabelaSelecionada = input == null ? null : input.Trim();
 
             if (tabelaSelecionada == null || !VerificarStringInList(tabelas, tabelaSelecionada))
             {
@@ -82,7 +131,7 @@ public class Sql
                 SelectCampos(tabelaSelecionada, connection);
             }
         }
-        /*
+        
         else if (option == 3)
         {
             // 3. ATUALIZAR DADOS
@@ -101,7 +150,7 @@ public class Sql
                 UpdateCampos(tabelaSelecionada, connection);
             }
         }
-        */
+        
     }
     public void DefinirCampos(string tabelaSelecionada)
     {
@@ -110,8 +159,8 @@ public class Sql
             campos =
             [
                 "nome",
-                "espaco_total",
-                "espaco_usado"
+                    "espaco_total",
+                    "espaco_usado"
             ];
         }
         else
@@ -119,8 +168,8 @@ public class Sql
             campos =
             [
                 "nome",
-                "raridade",
-                "efeito"
+                    "raridade",
+                    "efeito"
             ];
         }
     }
@@ -177,7 +226,6 @@ public class Sql
             }
         }
     }
-    /*
     public void UpdateCampos(string tabelaSelecionada, MySqlConnection connection)
     {
         string updateSql = $"UPDATE `{GerarCamposSql(campos, false)}` FROM `{tabelaSelecionada}`";
@@ -185,5 +233,6 @@ public class Sql
         {
 
         }
-    }*/
+    }
+    */
 }

@@ -1,5 +1,6 @@
 // Não sei se precisa
 CREATE DATABASE projeto_brainrot;
+CREATE DATABASE projeto_brainrot_teste;
 
 CREATE TABLE conta (
 	id INT PRIMARY KEY AUTO_INCREMENT,
@@ -8,18 +9,14 @@ CREATE TABLE conta (
 
 CREATE TABLE brainrot (
 	id INT PRIMARY KEY AUTO_INCREMENT,
+    id_conta INT,
     nome VARCHAR(50) NOT NULL,
     raridade VARCHAR(50) NOT NULL,
-    efeito VARCHAR(200) NOT NULL
-);
-
-CREATE TABLE conta_brainrot (
-	id_conta INT,
-    id_brainrot INT,
-    quantidade_brainrot INT NOT NULL,
-    PRIMARY KEY (id_conta, id_brainrot),
-    FOREIGN KEY (id_conta) REFERENCES conta(id),
-    FOREIGN KEY (id_brainrot) REFERENCES brainrot(id)
+    efeito VARCHAR(200) NOT NULL,
+    FOREIGN KEY (id_conta) REFERENCES conta(id)
 );
 
 SELECT id, nome FROM conta;
+SELECT id, id_conta, nome, raridade, efeito FROM brainrot;
+
+DROP TABLE brainrot, conta;

@@ -25,7 +25,7 @@ public static class GerenciarConexao
 
         if (tempOpcaoConexaoBanco == null || tempOpcaoConexaoBanco != "1" && tempOpcaoConexaoBanco != "2")
         {
-            Console.WriteLine("Erro ao selecionar o Banco\nOpção Inválida!");
+            Console.WriteLine("Erro!");
             Console.WriteLine("Digite qualquer tecla para continuar...");
             Console.ReadKey();
             return null;

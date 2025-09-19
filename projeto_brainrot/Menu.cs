@@ -14,7 +14,7 @@ public class Menu
             MostrarOpcoes();
             int opcaoSelecionadaValidada = PegarEValidarOpcao();
 
-            if (!ProcessarOpcao(opcaoSelecionadaValidada))
+            if (!ProcessarOpcaoComando(opcaoSelecionadaValidada))
             {
                 break;
             }
@@ -40,10 +40,10 @@ public class Menu
         while (true)
         {
             string? opcaoEscrita = PegarOpcao();
-            int? opcaoSelecionadaValidada = ValidarPegarOpcao(opcaoEscrita);
-            if (opcaoSelecionadaValidada != null)
+            int? opcaoEscritaValidada = ValidarPegarOpcao(opcaoEscrita);
+            if (opcaoEscritaValidada != null)
             {
-                return opcaoSelecionadaValidada.Value;
+                return opcaoEscritaValidada.Value;
             }
         }
     }
@@ -59,7 +59,7 @@ public class Menu
 
         if (!int.TryParse(opcaoEscrita, out int opcaoSelecionada) || opcaoSelecionada < 1 || opcaoSelecionada > 5)
         {
-            Console.WriteLine("Erro ao digitar uma Opção\nOpção inválida!");
+            Console.WriteLine("Erro!");
             Console.WriteLine("Digite qualquer tecla para continuar...");
             Console.ReadKey();
             Console.Clear();
@@ -67,7 +67,7 @@ public class Menu
         }
         return opcaoSelecionada;
     }
-    private bool ProcessarOpcao(int opcaoSelecionadaValidada)
+    private bool ProcessarOpcaoComando(int opcaoSelecionadaValidada)
     {
         switch (opcaoSelecionadaValidada)
         {
@@ -87,7 +87,8 @@ public class Menu
                 Console.WriteLine("Saindo...");
                 return false;
             default:
-                throw new InvalidOperationException($"Opção inesperada: {opcaoSelecionadaValidada}");
+                throw new InvalidOperationException
+                    ($"Opção inesperada: {opcaoSelecionadaValidada}");
         }
     }
 }

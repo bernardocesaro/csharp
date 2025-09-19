@@ -1,4 +1,5 @@
 using MySql.Data.MySqlClient;
+using System.Text.RegularExpressions;
 
 public class Sql
 {
@@ -8,9 +9,15 @@ public class Sql
         _stringConexao = stringConexao;
     }
 
-    public void ComandoInsert()
+    public void ExecutarComandoInsert()
     {
-        PegarEValidarTabela();
+
+    }
+    public void CriarComandoInsert()
+    {
+        string tabelaSelecionadaValidada = PegarEValidarTabela();
+        List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
+        var teste = PegarEValidarValoresCampos(camposTabelaSelecionada);
     }
     private string PegarEValidarTabela()
     {
@@ -34,9 +41,9 @@ public class Sql
     {
         tabelaEscrita = tabelaEscrita == null ? null : tabelaEscrita.Trim();
 
-        if (tabelaEscrita == null || !(tabelaEscrita == "conta") || !(tabelaEscrita == "brainrot"))
+        if (tabelaEscrita == null || !(tabelaEscrita == "conta") && !(tabelaEscrita == "brainrot"))
         {
-            Console.WriteLine("Erro ao digitar uma Tabela\nTabela inválida!");
+            Console.WriteLine("Erro!");
             Console.WriteLine("Digite qualquer tecla para continuar...");
             Console.ReadKey();
             Console.Clear();
@@ -44,7 +51,84 @@ public class Sql
         }
         return tabelaEscrita;
     }
+    private List<string> PegarCamposTabelaSelecionada(string tabelaSelecionadaValidada)
+    {
+        List<string> camposTabelaSelecionada = new List<string>(); 
 
+        if (tabelaSelecionadaValidada == "conta")
+        {
+            camposTabelaSelecionada =
+            [
+                "nome",
+                "espacos_ocupados",
+                "espacos_totais"
+            ];
+        }
+        else if (tabelaSelecionadaValidada == "brainrot")
+        {
+            camposTabelaSelecionada =
+            [
+                "id_conta",
+                "nome",
+                "raridade",
+                "efeito"
+            ];
+        }
+        else
+        {
+            throw new InvalidOperationException
+                ($"Tabela inesperada: {tabelaSelecionadaValidada}");
+        }
+        return camposTabelaSelecionada;
+    }
+    private string PegarEValidarValoresCampos(List<string> camposTabelaSelecionada)
+    {
+        // Utilizar as Classes para armazenar os valores dos campos
+        // Utilizar (typeof, getproperties, type, ...)
+        foreach (string campo in camposTabelaSelecionada)
+        {
+            while (true)
+            {
+                string? valorCampoEscrito = PegarValorCampo(camposTabelaSelecionada, campo);
+                string? valorCampoEscritoValidado = ValidarValorCampo(valorCampoEscrito);
+
+                if (valorCampoEscritoValidado != null)
+                {
+                    if (int.TryParse(valorCampoEscritoValidado, out int valorIntCampoEscritoValidado))
+                    {
+                        return valorCampoEscritoValidado;
+                    }
+                    else
+                    {
+                        return valorCampoEscritoValidado;
+                    }
+                }
+            }
+        }
+        return "A";
+    }
+    private string? PegarValorCampo(List<string> camposTabelaSelecionada, string campo)
+    {
+        Console.WriteLine($"\nDigite qual valor colocar no campo {campo}: ");
+        return Console.ReadLine();
+    }
+    private string? ValidarValorCampo(string? valorCampoEscrito)
+    {
+        string pattern = @"[^a-zA-Z0-9]";
+        if (valorCampoEscrito == null)
+        {
+            Console.WriteLine("Erro!");
+            Console.WriteLine("Digite qualquer tecla para continuar...");
+            Console.ReadKey();
+            Console.Clear();
+            return null;
+        }
+        return valorCampoEscrito = Regex.Replace(valorCampoEscrito, pattern, "");
+    }
+    public void CriarValuesInsert()
+    {
+
+    }
     public void ComandoSelect()
     {
 
@@ -159,8 +243,8 @@ public class Sql
             campos =
             [
                 "nome",
-                    "espaco_total",
-                    "espaco_usado"
+                "espaco_total",
+                "espaco_usado"
             ];
         }
         else
@@ -168,8 +252,8 @@ public class Sql
             campos =
             [
                 "nome",
-                    "raridade",
-                    "efeito"
+                "raridade",
+                "efeito"
             ];
         }
     }

@@ -1,30 +1,23 @@
-﻿using System;
-using Google.Protobuf.WellKnownTypes;
-using MySql.Data.MySqlClient;
-
+﻿
 class Program
 {
     static void Main()
     {
-        string stringConexao = GerenciarConexao.Executar();
         Console.Clear();
+        string stringConexao = GerenciarConexao.Executar();
 
-        using (var connection = new MySqlConnection(stringConexao))
+        try
         {
-            try
-            {
-                connection.Open();
-                Console.WriteLine("Conectado ao MySQL!");
+            Console.WriteLine("Conectado ao MySQL!");
 
-                Sql sql = new Sql(stringConexao);
-                Menu menu = new Menu(sql);
+            MiSql mySql = new MiSql(stringConexao);
+            Menu menu = new Menu(mySql);
 
-                menu.Executar();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erro: {ex.Message}");
-            }
+            menu.Executar();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro: {ex.Message}");
         }
     }
 }

@@ -1,3 +1,4 @@
+
 public static class GerenciarConexao
 {
     public static string Executar()
@@ -7,7 +8,7 @@ public static class GerenciarConexao
             Console.Clear();
             string? tempOpcaoConexaoBanco = EscolherConexao();
             string? stringConexao = ValidarEscolherConexao(tempOpcaoConexaoBanco);
-            
+
             if (stringConexao != null)
             {
                 return stringConexao;
@@ -16,7 +17,7 @@ public static class GerenciarConexao
     }
     private static string? EscolherConexao()
     {
-        Console.WriteLine("Deseja usar o banco Real (1) ou Teste (2)?");
+        Console.WriteLine("Deseja usar o banco Real (1) ou o banco Teste (2)?");
         return Console.ReadLine();
     }
     private static string? ValidarEscolherConexao(string? tempOpcaoConexaoBanco)
@@ -25,9 +26,7 @@ public static class GerenciarConexao
 
         if (tempOpcaoConexaoBanco == null || tempOpcaoConexaoBanco != "1" && tempOpcaoConexaoBanco != "2")
         {
-            Console.WriteLine("Erro!");
-            Console.WriteLine("Digite qualquer tecla para continuar...");
-            Console.ReadKey();
+            Utilidades.MostrarErro();
             return null;
         }
         else

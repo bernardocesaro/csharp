@@ -1,7 +1,8 @@
+
 public class Menu
 {
-    private readonly Sql _sql;
-    public Menu(Sql sql)
+    private readonly MiSql _sql;
+    public Menu(MiSql sql)
     {
         _sql = sql;
     }
@@ -11,7 +12,7 @@ public class Menu
         while (true)
         {
             Console.Clear();
-            MostrarOpcoes();
+            MostrarMenu();
             int opcaoSelecionadaValidada = PegarEValidarOpcao();
 
             if (!ProcessarOpcaoComando(opcaoSelecionadaValidada))
@@ -20,16 +21,17 @@ public class Menu
             }
         }
     }
-    private void MostrarOpcoes()
+    private void MostrarMenu()
     {
         string[] opcoesMenu =
-            {
-                "1 - Insert dados",
-                "2 - Select dados",
-                "3 - Update dados",
-                "4 - Delete dados",
-                "5 - Sair"
-            };
+        {
+            "Menu MySql - Comandos",
+            "1 - Insert dados",
+            "2 - Select dados",
+            "3 - Update dados",
+            "4 - Delete dados",
+            "5 - Sair"
+        };
         foreach (var opcaoMenu in opcoesMenu)
         {
             Console.WriteLine(opcaoMenu);
@@ -37,15 +39,13 @@ public class Menu
     }
     private int PegarEValidarOpcao()
     {
-        while (true)
+        string? opcaoEscrita = PegarOpcao();
+        int? opcaoEscritaValidada = ValidarPegarOpcao(opcaoEscrita);
+        if (opcaoEscritaValidada != null)
         {
-            string? opcaoEscrita = PegarOpcao();
-            int? opcaoEscritaValidada = ValidarPegarOpcao(opcaoEscrita);
-            if (opcaoEscritaValidada != null)
-            {
-                return opcaoEscritaValidada.Value;
-            }
+            return opcaoEscritaValidada.Value;
         }
+        return 0;
     }
     private string? PegarOpcao()
     {
@@ -59,10 +59,7 @@ public class Menu
 
         if (!int.TryParse(opcaoEscrita, out int opcaoSelecionada) || opcaoSelecionada < 1 || opcaoSelecionada > 5)
         {
-            Console.WriteLine("Erro!");
-            Console.WriteLine("Digite qualquer tecla para continuar...");
-            Console.ReadKey();
-            Console.Clear();
+            Utilidades.MostrarErro();
             return null;
         }
         return opcaoSelecionada;
@@ -71,19 +68,27 @@ public class Menu
     {
         switch (opcaoSelecionadaValidada)
         {
+            case 0:
+                return true;
             case 1:
-                Console.WriteLine("Executando INSERT");
+                Console.Clear();
+                Console.WriteLine("Executando INSERT\n");
+                _sql.ExecutarComandoInsert();
                 return true;
             case 2:
-                Console.WriteLine("Executando SELECT");
+                Console.Clear();
+                Console.WriteLine("Executando SELECT\n");
                 return true;
             case 3:
-                Console.WriteLine("Executando UPDATE");
+                Console.Clear();
+                Console.WriteLine("Executando UPDATE\n");
                 return true;
             case 4:
-                Console.WriteLine("Executando DELETE");
+                Console.Clear();
+                Console.WriteLine("Executando DELETE\n");
                 return true;
             case 5:
+                Console.Clear();
                 Console.WriteLine("Saindo...");
                 return false;
             default:

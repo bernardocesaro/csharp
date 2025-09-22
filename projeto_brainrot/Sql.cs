@@ -1,52 +1,133 @@
 using MySql.Data.MySqlClient;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
-public class Sql
+public class MiSql
 {
     private readonly string _stringConexao;
-    public Sql(string stringConexao)
+    protected Conta conta { get; set; } = new Conta();
+    protected Brainrot brainrot { get; set; } = new Brainrot();
+
+    public MiSql(string stringConexao)
     {
         _stringConexao = stringConexao;
     }
-
     public void ExecutarComandoInsert()
     {
+        using (var connection = new MySqlConnection(_stringConexao))
+        {
+            bool estaConectado = TestandoConexao();
 
+            if (!estaConectado)
+            {
+                Utilidades.MostrarErro();
+            }
+            else
+            {
+                Console.WriteLine("Conectado ao MySQL com sucesso!\n");
+
+                connection.Open();
+                CriarComandoInsert(connection);
+            }
+        }
     }
-    public void CriarComandoInsert()
+    public bool TestandoConexao()
     {
+        try
+        {
+            using (var connection = new MySqlConnection(_stringConexao))
+            {
+                connection.Open();
+                Console.WriteLine("Testando conexão...");
+                return true;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
+    public void CriarComandoInsert(MySqlConnection connection)
+    {
+        // Fazer um mini debug, tipo:
+
+        // Console.WriteLine($"=== DEBUG SQL ===");
+        // Console.WriteLine($"SQL: {sql}");
+        // Console.WriteLine($"Tabela: {tabela}");
+        // Console.WriteLine($"Campos: {string.Join(", ", campos)}");
+        // Console.WriteLine($"Instância: {instancia.GetType().Name}");
+
+        // Ai teria que trocar o nome das variáveis e de outras coisas
+
         string tabelaSelecionadaValidada = PegarEValidarTabela();
         List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
-        var teste = PegarEValidarValoresCampos(camposTabelaSelecionada);
+        PegarEValidarEAtribuirValoresCampos(tabelaSelecionadaValidada, camposTabelaSelecionada);
+
+        string stringComandoInsert = $"INSERT INTO {tabelaSelecionadaValidada} ({GerarCamposComandoSql(camposTabelaSelecionada)}) VALUES ({GerarParametrosComandoSql(camposTabelaSelecionada)})";
+        Console.WriteLine($"O comando gerado foi esse: {stringComandoInsert}");
+
+        using (var comandoInsert = new MySqlCommand(stringComandoInsert, connection))
+        {
+            PropertyInfo[] propriedades = null;
+            object instancia = null;
+
+            switch (tabelaSelecionadaValidada)
+            {
+                case "conta":
+                    propriedades = conta.GetType().GetProperties();
+                    instancia = conta;
+                    break;
+                case "brainrot":
+                    propriedades = brainrot.GetType().GetProperties();
+                    instancia = brainrot;
+                    break;
+                default:
+                    Utilidades.MostrarErro();
+                    break;
+            }
+
+            if (propriedades != null)
+            {
+                for (int i = 0; i < camposTabelaSelecionada.Count; i++)
+                {
+                    // Ordenar as propriedades, id = 0; nome = 1
+                    // Pelo que parece a ordem não necessáriamente é a que está na classe, depende de algumas coisas
+                    // A ideia é ordenar manualmente para ver se funciona
+                    comandoInsert.Parameters.AddWithValue($"@{camposTabelaSelecionada[i]}", propriedades[i + 1].GetValue(instancia));
+                }
+                comandoInsert.ExecuteNonQuery();
+            }
+        }
     }
     private string PegarEValidarTabela()
     {
         while (true)
         {
             string? tabelaEscrita = PegarTabela();
-            string? tabelaEscritaValidada = ValidarPegarTabela(tabelaEscrita);
+            string? tabelaEscritaValidada = ValidarTabela(tabelaEscrita);
             if (tabelaEscritaValidada != null)
             {
+                Console.WriteLine("\nTabela validada com sucesso!\n");
                 return tabelaEscritaValidada;
+            }
+            else
+            {
+                Utilidades.MostrarErro();
             }
         }
     }
     private string? PegarTabela()
     {
-        Console.WriteLine($"\nDigite em qual tabela deseja fazer um INSERT: ");
-        Console.WriteLine("Tabelas disponíveis: 'conta', 'brainrot'");
+        Console.WriteLine($"Digite em qual tabela deseja fazer um INSERT: ");
+        Console.Write("Tabelas disponíveis: 'conta', 'brainrot' --> ");
         return Console.ReadLine();
     }
-    private string? ValidarPegarTabela(string? tabelaEscrita)
+    private string? ValidarTabela(string? tabelaEscrita)
     {
         tabelaEscrita = tabelaEscrita == null ? null : tabelaEscrita.Trim();
 
         if (tabelaEscrita == null || !(tabelaEscrita == "conta") && !(tabelaEscrita == "brainrot"))
         {
-            Console.WriteLine("Erro!");
-            Console.WriteLine("Digite qualquer tecla para continuar...");
-            Console.ReadKey();
-            Console.Clear();
             return null;
         }
         return tabelaEscrita;
@@ -59,19 +140,19 @@ public class Sql
         {
             camposTabelaSelecionada =
             [
-                "nome",
-                "espacos_ocupados",
-                "espacos_totais"
+                "Nome",
+                "EspacosTotais",
+                "EspacosOcupados"
             ];
         }
         else if (tabelaSelecionadaValidada == "brainrot")
         {
             camposTabelaSelecionada =
             [
-                "id_conta",
-                "nome",
-                "raridade",
-                "efeito"
+                "IdConta",
+                "Nome",
+                "Raridade",
+                "Efeito"
             ];
         }
         else
@@ -81,10 +162,8 @@ public class Sql
         }
         return camposTabelaSelecionada;
     }
-    private string PegarEValidarValoresCampos(List<string> camposTabelaSelecionada)
+    private void PegarEValidarEAtribuirValoresCampos(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
     {
-        // Utilizar as Classes para armazenar os valores dos campos
-        // Utilizar (typeof, getproperties, type, ...)
         foreach (string campo in camposTabelaSelecionada)
         {
             while (true)
@@ -94,40 +173,93 @@ public class Sql
 
                 if (valorCampoEscritoValidado != null)
                 {
-                    if (int.TryParse(valorCampoEscritoValidado, out int valorIntCampoEscritoValidado))
-                    {
-                        return valorCampoEscritoValidado;
-                    }
-                    else
-                    {
-                        return valorCampoEscritoValidado;
-                    }
+                    AtribuirValorCampo(tabelaSelecionadaValidada, campo, valorCampoEscritoValidado);
+                    break;
+                }
+                else
+                {
+                    Utilidades.MostrarErro();
                 }
             }
         }
-        return "A";
     }
     private string? PegarValorCampo(List<string> camposTabelaSelecionada, string campo)
     {
-        Console.WriteLine($"\nDigite qual valor colocar no campo {campo}: ");
+        Console.WriteLine($"Digite qual valor colocar no campo {campo}: ");
         return Console.ReadLine();
     }
     private string? ValidarValorCampo(string? valorCampoEscrito)
     {
-        string pattern = @"[^a-zA-Z0-9]";
-        if (valorCampoEscrito == null)
+        string patternVerificador = @"[a-zA-Z0-9]";
+        string patternCerto = @"[^a-zA-Z0-9]";
+        if (valorCampoEscrito == null || Regex.Replace(valorCampoEscrito, patternVerificador, "").Length > 0)
         {
-            Console.WriteLine("Erro!");
-            Console.WriteLine("Digite qualquer tecla para continuar...");
-            Console.ReadKey();
-            Console.Clear();
             return null;
         }
-        return valorCampoEscrito = Regex.Replace(valorCampoEscrito, pattern, "");
+        return Regex.Replace(valorCampoEscrito, patternCerto, "");
     }
-    public void CriarValuesInsert()
+    private void AtribuirValorCampo(string tabelaSelecionadaValidada, string campo, string valorCampoEscritoValidado)
     {
+        PropertyInfo propriedade = PegarPropriedadeTabela(tabelaSelecionadaValidada, campo);
 
+        if (propriedade != null)
+        {
+            if (int.TryParse(valorCampoEscritoValidado, out int valorIntCampoEscritoValidado))
+            {
+                switch (tabelaSelecionadaValidada)
+                {
+                    case "conta":
+                        propriedade.SetValue(conta, valorIntCampoEscritoValidado);
+                        break;
+                    case "brainrot":
+                        propriedade.SetValue(brainrot, valorIntCampoEscritoValidado);
+                        break;
+                    default:
+                        throw new InvalidOperationException
+                            ($"Tabela inesperada: {tabelaSelecionadaValidada}");
+                }
+            }
+            else
+            {
+                switch (tabelaSelecionadaValidada)
+                {
+                    case "conta":
+                        propriedade.SetValue(conta, valorCampoEscritoValidado);
+                        break;
+                    case "brainrot":
+                        propriedade.SetValue(brainrot, valorCampoEscritoValidado);
+                        break;
+                    default:
+                        Utilidades.MostrarErro();
+                        break;
+                }
+            }
+        }
+    }
+    private PropertyInfo PegarPropriedadeTabela(string tabelaSelecionadaValidada, string campo)
+    {
+        switch (tabelaSelecionadaValidada)
+        {
+            case "conta":
+                Type tipoConta = typeof(Conta);
+                return tipoConta.GetProperty(campo);
+            case "brainrot":
+                Type tipoBrainrot = typeof(Brainrot);
+                return tipoBrainrot.GetProperty(campo);
+            default:
+                Utilidades.MostrarErro();
+                return null;
+        }
+    }
+    private string GerarCamposComandoSql(List<string> camposTabelaSelecionada)
+    {
+        string camposSql = string.Join(", ", camposTabelaSelecionada);
+        return camposSql;
+    }
+    private string GerarParametrosComandoSql(List<string> camposTabelaSelecionada)
+    {
+        string camposSql = "@" + string.Join(", @", camposTabelaSelecionada);
+        return camposSql;
     }
     public void ComandoSelect()
     {
@@ -151,7 +283,7 @@ public class Sql
         }
         return false;
     }
-    public string GerarCamposSql(List<string> campos, bool parametro)
+    public string GerarCamposComandoSql(List<string> campos, bool parametro)
     {
         string camposSql = "";
         string arroba = "";

@@ -36,7 +36,7 @@ public static class GerenciarConexao
     }
     private static string AtribuirConexao(string tempOpcaoConexaoBanco)
     {
-        string stringConexao = tempOpcaoConexaoBanco == "2"
+        string stringConexao = tempOpcaoConexaoBanco == "1"
             ? "server=localhost;user=root;password=mysql_local1510;database=projeto_brainrot;"
             : "server=localhost;user=root;password=mysql_local1510;database=projeto_brainrot_teste;";
         return stringConexao;

@@ -1,10 +1,10 @@
 
 public class Menu
 {
-    private readonly MiSql _sql;
-    public Menu(MiSql sql)
+    private readonly MiSql _miSql;
+    public Menu(MiSql miSql)
     {
-        _sql = sql;
+        _miSql = miSql;
     }
 
     public void Executar()
@@ -51,7 +51,6 @@ public class Menu
     {
         Console.Write("Escolha uma opção: ");
         return Console.ReadLine();
-
     }
     private int? ValidarPegarOpcao(string? opcaoEscrita)
     {
@@ -66,34 +65,30 @@ public class Menu
     }
     private bool ProcessarOpcaoComando(int opcaoSelecionadaValidada)
     {
+        Console.Clear();
         switch (opcaoSelecionadaValidada)
         {
             case 0:
                 return true;
             case 1:
-                Console.Clear();
                 Console.WriteLine("Executando INSERT\n");
-                _sql.ExecutarComandoInsert();
+                _miSql.ExecutarComandoInsert();
                 return true;
             case 2:
-                Console.Clear();
                 Console.WriteLine("Executando SELECT\n");
+                _miSql.ExecutarComandoSelect();
                 return true;
             case 3:
-                Console.Clear();
                 Console.WriteLine("Executando UPDATE\n");
                 return true;
             case 4:
-                Console.Clear();
                 Console.WriteLine("Executando DELETE\n");
                 return true;
             case 5:
-                Console.Clear();
                 Console.WriteLine("Saindo...");
                 return false;
             default:
-                throw new InvalidOperationException
-                    ($"Opção inesperada: {opcaoSelecionadaValidada}");
+                throw new InvalidOperationException ($"Opção inesperada: {opcaoSelecionadaValidada}");
         }
     }
 }

@@ -8,10 +8,8 @@ class Program
 
         try
         {
-            Console.WriteLine("Conectado ao MySQL!");
-
-            MiSql mySql = new MiSql(stringConexao);
-            Menu menu = new Menu(mySql);
+            MiSql miSql = new MiSql(stringConexao);
+            Menu menu = new Menu(miSql);
 
             menu.Executar();
         }

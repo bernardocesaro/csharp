@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("projeto_brainrot")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+574f5d45d0d6398142ddbc144aede59a9a1af019")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a66059337ae27d55e3ff8cb4f61749715e6a7b44")]
 [assembly: System.Reflection.AssemblyProductAttribute("projeto_brainrot")]
 [assembly: System.Reflection.AssemblyTitleAttribute("projeto_brainrot")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -17,7 +17,83 @@ public class MiSql
         using (var conexao = ConexaoBanco())
         {
             Console.Clear();
-            CriarComandoInsert(conexao);
+
+            string tabelaSelecionadaValidada = PegarEValidarTabela();
+            List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
+            
+            PegarEValidarEAtribuirValoresCampos(tabelaSelecionadaValidada, camposTabelaSelecionada);
+
+            string stringComandoInsert = CriarComandoInsert(tabelaSelecionadaValidada, camposTabelaSelecionada);
+
+            using (var comandoInsert = new MySqlCommand(stringComandoInsert, conexao))
+            {
+                PropertyInfo[] propriedades;
+                object instancia;
+                Console.WriteLine("debug");
+                switch (tabelaSelecionadaValidada)
+                {
+                    case "conta":
+                        propriedades = conta.GetType().GetProperties();
+                        /*
+                        propriedades = propriedades.OrderBy(p => p.Name switch
+                        {
+                            "Id" => 0,
+                            "Nome" => 1, 
+                            "EspacosTotais" => 2,
+                            "EspacosOcupados" => 3,
+                            _ => 4
+                        }).ToArray();
+                        */
+                        instancia = conta;
+                        break;
+                    case "brainrot":
+                        propriedades = brainrot.GetType().GetProperties();
+                        /*
+                        propriedades = propriedades.OrderBy(p => p.Name switch
+                        {
+                            "Id" => 0,
+                            "IdConta" => 1,
+                            "Nome" => 2,
+                            "Raridade" => 3,
+                            "Efeito" => 4,
+                            _ => 5
+                        }).ToArray();
+                        */
+                        instancia = brainrot;
+                        break;
+                    default:
+                        propriedades = null;
+                        instancia = null;
+                        Utilidades.MostrarErro();
+                        break;
+                }
+
+                if (propriedades != null)
+                {
+                    try
+                    {
+                        for (int i = 0; i < camposTabelaSelecionada.Count; i++)
+                        {
+                            // Console.WriteLine(camposTabelaSelecionada[i]);
+                            // Console.WriteLine(propriedades[i + 1]);
+                            object valor = propriedades[i + 1].GetValue(instancia);
+                            comandoInsert.Parameters.AddWithValue($"@{camposTabelaSelecionada[i + 1]}", valor);
+                        }
+                        comandoInsert.ExecuteNonQuery();
+
+                        Console.WriteLine("Registrando dados");
+                        Thread.Sleep(800);
+                        Console.Clear();
+                        Console.WriteLine("Dados Registrados!");
+                        Utilidades.Retornar();
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Problema");
+                        Utilidades.MostrarErro();
+                    }
+                }
+            }
         }
     }
     public MySqlConnection ConexaoBanco()
@@ -55,99 +131,12 @@ public class MiSql
             return false;
         }
     }
-    public void CriarComandoInsert(MySqlConnection connection)
+    private string CriarComandoInsert(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
     {
-        string tabelaSelecionadaValidada = PegarEValidarTabela();
-        List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
-        PegarEValidarEAtribuirValoresCampos(tabelaSelecionadaValidada, camposTabelaSelecionada);
-
         string stringComandoInsert = $"INSERT INTO {tabelaSelecionadaValidada} ({GerarCamposComandoSql(camposTabelaSelecionada)}) VALUES ({GerarParametrosComandoSql(camposTabelaSelecionada)})";
         // Console.WriteLine($"\nO comando gerado foi esse: {stringComandoInsert}\n");
 
-        using (var comandoInsert = new MySqlCommand(stringComandoInsert, connection))
-        {
-            PropertyInfo[] propriedades = null;
-            object instancia = null;
-
-            switch (tabelaSelecionadaValidada)
-            {
-                case "conta":
-                    propriedades = conta.GetType().GetProperties();
-                    propriedades = propriedades.OrderBy(p => p.Name switch
-                    {
-                        "Id" => 0,
-                        "Nome" => 1, 
-                        "EspacosTotais" => 2,
-                        "EspacosOcupados" => 3,
-                        _ => 4
-                    }).ToArray();
-                    instancia = conta;
-                    break;
-                case "brainrot":
-                    propriedades = brainrot.GetType().GetProperties();
-                    propriedades = propriedades.OrderBy(p => p.Name switch
-                    {
-                        "Id" => 0,
-                        "IdConta" => 1, 
-                        "Nome" => 2,
-                        "Raridade" => 3,
-                        "Efeito" => 4,
-                        _ => 5
-                    }).ToArray();
-                    instancia = brainrot;
-                    break;
-                default:
-                    Utilidades.MostrarErro();
-                    break;
-            }
-            
-            /*
-            Console.WriteLine($"=== DEBUG SQL ===");
-            Console.WriteLine($"SQL: {stringComandoInsert}");
-            Console.WriteLine($"Tabela: {tabelaSelecionadaValidada}");
-            Console.WriteLine($"Campos: {string.Join(", ", camposTabelaSelecionada)}");
-            Console.WriteLine($"Instância: {instancia.GetType().Name}");
-            */
-
-            if (propriedades != null)
-            {
-                /*
-                Console.WriteLine("=== DEBUG: VERIFICANDO ÍNDICES ===");
-                Console.WriteLine($"Número de propriedades: {propriedades.Length}");
-                Console.WriteLine($"Número de campos: {camposTabelaSelecionada.Count}");
-                for (int i = 0; i < propriedades.Length; i++)
-                {
-                    Console.WriteLine($"propriedades[{i}] = {propriedades[i].Name}");
-                }
-                 for (int i = 0; i < camposTabelaSelecionada.Count; i++)
-                {
-                    Console.WriteLine($"camposTabelaSelecionada[{i}] = {camposTabelaSelecionada[i]}");
-                }
-                */
-
-                try
-                {
-                    for (int i = 0; i < camposTabelaSelecionada.Count; i++)
-                    {
-                        // Console.WriteLine(camposTabelaSelecionada[i]);
-                        // Console.WriteLine(propriedades[i + 1]);
-                        object valor = propriedades[i + 1].GetValue(instancia);
-                        comandoInsert.Parameters.AddWithValue($"@{camposTabelaSelecionada[i + 1]}", valor);
-                    }
-                    comandoInsert.ExecuteNonQuery();
-
-                    Console.WriteLine("Registrando dados");
-                    Thread.Sleep(800);
-                    Console.Clear();
-                    Console.WriteLine("Dados Registrados!");
-                    Utilidades.Retornar();
-                }
-                catch
-                {
-                    Utilidades.MostrarErro();
-                }
-            }
-        }
+        return stringComandoInsert;
     }
     private string PegarEValidarTabela()
     {
@@ -219,8 +208,14 @@ public class MiSql
         {
             while (true)
             {
-                string? valorCampoEscrito = PegarValorCampo(camposTabelaSelecionada, campo);
-                string? valorCampoEscritoValidado = ValidarValorCampo(valorCampoEscrito);
+                if (campo == "Id")
+                {
+                    break;
+                }
+
+                string? valorCampoEscrito = PegarValorCampo(campo);
+
+                string? valorCampoEscritoValidado = ValidarValorCampo(tabelaSelecionadaValidada, campo, valorCampoEscrito);
 
                 if (valorCampoEscritoValidado != null)
                 {
@@ -234,19 +229,37 @@ public class MiSql
             }
         }
     }
-    private string? PegarValorCampo(List<string> camposTabelaSelecionada, string campo)
+    private string? PegarValorCampo(string campo)
     {
         Console.Write($"Digite qual valor colocar no campo {campo}: ");
         return Console.ReadLine();
     }
-    private string? ValidarValorCampo(string? valorCampoEscrito)
+    private string? ValidarValorCampo(string tabelaSelecionadaValidada, string campo, string? valorCampoEscrito)
     {
+        Type tipoPropriedade;
+        switch (tabelaSelecionadaValidada)
+        {
+            case "conta":
+                tipoPropriedade = conta.GetType().GetProperty(campo).PropertyType;
+                break;
+            case "brainrot":
+                tipoPropriedade = brainrot.GetType().GetProperty(campo).PropertyType;
+                break;
+            default:
+                tipoPropriedade = null;
+                Utilidades.MostrarErro();
+                break;
+        }
+        
         string patternVerificador = @"[a-zA-Z0-9]";
         string patternCerto = @"[^a-zA-Z0-9]";
-        if (valorCampoEscrito == null || Regex.Replace(valorCampoEscrito, patternVerificador, "").Length > 0)
+
+        if (tipoPropriedade != valorCampoEscrito.GetType() || Regex.Replace(valorCampoEscrito, patternVerificador, "").Length > 0)
         {
+            Console.WriteLine("n passou do regex");
             return null;
         }
+        Console.WriteLine("passou do regex");
         return Regex.Replace(valorCampoEscrito, patternCerto, "");
     }
     private void AtribuirValorCampo(string tabelaSelecionadaValidada, string campo, string valorCampoEscritoValidado)
@@ -281,8 +294,8 @@ public class MiSql
                         propriedade.SetValue(brainrot, valorCampoEscritoValidado);
                         break;
                     default:
-                        Utilidades.MostrarErro();
-                        break;
+                        throw new InvalidOperationException
+                            ($"Tabela inesperada: {tabelaSelecionadaValidada}");
                 }
             }
         }
@@ -302,7 +315,7 @@ public class MiSql
                 return null;
         }
     }
-    public string GerarCamposComandoSql(List<string> camposTabelaSelecionada)
+    private string GerarCamposComandoSql(List<string> camposTabelaSelecionada)
     {
         string camposSql = string.Join(", ", camposTabelaSelecionada);
         return camposSql;
@@ -336,14 +349,14 @@ public class MiSql
             }
         }
     }
-    public string CriarComandoSelect(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
+    private string CriarComandoSelect(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
     {
         string stringComandoSelect = $"SELECT {GerarCamposComandoSql(camposTabelaSelecionada)} FROM {tabelaSelecionadaValidada}";
         // Console.WriteLine($"\nO comando gerado foi esse: {stringComandoSelect}\n");
 
         return stringComandoSelect;
     }
-    public void MostrarSelect(MySqlDataReader leitor, string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
+    private void MostrarSelect(MySqlDataReader leitor, string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
     {
         Console.WriteLine($"Dados da tabela '{tabelaSelecionadaValidada}'");
 
@@ -354,7 +367,7 @@ public class MiSql
         Console.WriteLine("\nMais nenhum resultado encontrado!");
         Utilidades.Retornar();
     }
-    public void MostrarCamposSelect(List<string> camposTabelaSelecionada)
+    private void MostrarCamposSelect(List<string> camposTabelaSelecionada)
     {
         for (int i = 0; i < camposTabelaSelecionada.Count; i++)
         {
@@ -362,7 +375,7 @@ public class MiSql
         }
         Console.Write("|\n");
     }
-    public void MostrarLinhaSeparadoraSelect(List<string> camposTabelaSelecionada)
+    private void MostrarLinhaSeparadoraSelect(List<string> camposTabelaSelecionada)
     {
         for (int i = 0; i < camposTabelaSelecionada.Count; i++)
         {
@@ -370,7 +383,7 @@ public class MiSql
         }
         Console.Write("|\n");
     }
-    public void MostrarDadosSelect(MySqlDataReader leitor, List<string> camposTabelaSelecionada)
+    private void MostrarDadosSelect(MySqlDataReader leitor, List<string> camposTabelaSelecionada)
     {
         while (leitor.Read())
         {

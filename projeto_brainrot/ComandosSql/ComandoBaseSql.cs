@@ -1,26 +1,76 @@
-using MySql.Data.MySqlClient;
-using System.Text.RegularExpressions;
-using System.Reflection;
+public enum OpcaoTabela { Conta = 1, Brainrot = 2, Sair = 3 }
 
-public class MiSql
+public abstract class ComandoBaseSql
 {
-    private readonly string _stringConexao;
+    protected readonly string _stringConexao;
+    protected readonly Dictionary<OpcaoTabela, Type> TabelasValidas = new Dictionary<OpcaoTabela, Type>()
+    {
+        { OpcaoTabela.Conta, typeof(Conta) },
+        { OpcaoTabela.Brainrot, typeof(Brainrot) },
+        { OpcaoTabela.Sair, typeof(string) }
+    };
     protected Conta conta { get; set; } = new Conta();
     protected Brainrot brainrot { get; set; } = new Brainrot();
-    public MiSql(string stringConexao)
+    public ComandoBaseSql(string stringConexao)
     {
         _stringConexao = stringConexao;
     }
-    
+
+    public abstract void Executar();
+    protected OpcaoTabela PegarEValidarTabela()
+    {
+        while (true)
+        {
+            string? input = PegarTabela();
+            OpcaoTabela? tabelaValidada = ValidarTabela(input);
+            if (tabelaValidada.HasValue)
+            {
+                if (tabelaValidada.Value == OpcaoTabela.Sair)
+                {
+                    return tabelaValidada.Value;
+                }
+                Console.WriteLine("\nTabela validada com sucesso!\n");
+                Thread.Sleep(800);
+                Console.Clear();
+                return tabelaValidada.Value;
+            }
+            else
+            {
+                Utilidades.MostrarErro();
+            }
+        }
+    }
+    protected string? PegarTabela()
+    {
+        Console.WriteLine("Digite qual tabela deseja selecionar (Digite 'sair' para voltar ao menu): ");
+        return Console.ReadLine();
+    }
+    protected OpcaoTabela? ValidarTabela(string? input)
+    {
+        input = input == null ? null : input.Trim();
+
+        if (int.TryParse(input, out int tabelaValidada) && TabelasValidas.ContainsKey((OpcaoTabela)tabelaValidada))
+        {
+            return (OpcaoTabela)tabelaValidada;
+        }
+        return null;
+    }
+
+
+
+
+
+
+
     public void ExecutarComandoInsert()
     {
-        using (var conexao = ConexaoBanco())
+        using (var conexao = TestarConexao.ConectarBanco(_stringConexao))
         {
             Console.Clear();
 
-            string tabelaSelecionadaValidada = PegarEValidarTabela();
+            string tabelaSelecionadaValidada = PegarEValidarTabela().ToString(); // mudar depois
             List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
-            
+
             PegarEValidarEAtribuirValoresCampos(tabelaSelecionadaValidada, camposTabelaSelecionada);
 
             string stringComandoInsert = CriarComandoInsert(tabelaSelecionadaValidada, camposTabelaSelecionada);
@@ -96,41 +146,7 @@ public class MiSql
             }
         }
     }
-    public MySqlConnection ConexaoBanco()
-    {
-        var connection = new MySqlConnection(_stringConexao);
 
-        bool estaConectado = TestarConexao();
-
-        if (!estaConectado)
-        {
-            Utilidades.MostrarErro();
-            throw new Exception("Falha na conexão com o banco");
-        }
-
-        connection.Open();
-        Console.WriteLine("Conectado ao MySQL com sucesso!");
-        Thread.Sleep(800);
-        Console.Clear();
-
-        return connection;
-    }
-    public bool TestarConexao()
-    {
-        try
-        {
-            using (var connection = new MySqlConnection(_stringConexao))
-            {
-                connection.Open();
-                Console.WriteLine("Testando conexão...");
-                return true;
-            }
-        }
-        catch
-        {
-            return false;
-        }
-    }
     private string CriarComandoInsert(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
     {
         string stringComandoInsert = $"INSERT INTO {tabelaSelecionadaValidada} ({GerarCamposComandoSql(camposTabelaSelecionada)}) VALUES ({GerarParametrosComandoSql(camposTabelaSelecionada)})";
@@ -138,41 +154,11 @@ public class MiSql
 
         return stringComandoInsert;
     }
-    private string PegarEValidarTabela()
-    {
-        while (true)
-        {
-            string? tabelaEscrita = PegarTabela();
-            string? tabelaEscritaValidada = ValidarTabela(tabelaEscrita);
-            if (tabelaEscritaValidada != null)
-            {
-                Console.WriteLine("\nTabela validada com sucesso!\n");
-                Thread.Sleep(800);
-                Console.Clear();
-                return tabelaEscritaValidada;
-            }
-            Utilidades.MostrarErro();
-        }
-    }
-    private string? PegarTabela()
-    {
-        Console.WriteLine($"Digite qual tabela deseja selecionar: ");
-        Console.Write("Tabelas disponíveis: 'conta', 'brainrot' --> ");
-        return Console.ReadLine();
-    }
-    private string? ValidarTabela(string? tabelaEscrita)
-    {
-        tabelaEscrita = tabelaEscrita == null ? null : tabelaEscrita.Trim();
 
-        if (tabelaEscrita == null || !(tabelaEscrita == "conta") && !(tabelaEscrita == "brainrot"))
-        {
-            return null;
-        }
-        return tabelaEscrita;
-    }
-    private List<string> PegarCamposTabelaSelecionada(string tabelaSelecionadaValidada)
+
+    public List<string> PegarCamposTabelaSelecionada(string tabelaSelecionadaValidada)
     {
-        List<string> camposTabelaSelecionada = new List<string>(); 
+        List<string> camposTabelaSelecionada = new List<string>();
 
         if (tabelaSelecionadaValidada == "conta")
         {
@@ -250,7 +236,7 @@ public class MiSql
                 Utilidades.MostrarErro();
                 break;
         }
-        
+
         string patternVerificador = @"[a-zA-Z0-9]";
         string patternCerto = @"[^a-zA-Z0-9]";
 
@@ -315,7 +301,7 @@ public class MiSql
                 return null;
         }
     }
-    private string GerarCamposComandoSql(List<string> camposTabelaSelecionada)
+    public string GerarCamposComandoSql(List<string> camposTabelaSelecionada)
     {
         string camposSql = string.Join(", ", camposTabelaSelecionada);
         return camposSql;
@@ -329,11 +315,11 @@ public class MiSql
     // Select
     public void ExecutarComandoSelect()
     {
-        using (var conexao = ConexaoBanco())
+        using (var conexao = TestarConexao.ConectarBanco(_stringConexao))
         {
             Console.Clear();
 
-            string tabelaSelecionadaValidada = PegarEValidarTabela();
+            string tabelaSelecionadaValidada = PegarEValidarTabela().ToString(); // mudar depois
             List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
 
             string stringComandoSelect = CriarComandoSelect(tabelaSelecionadaValidada, camposTabelaSelecionada);
@@ -401,7 +387,7 @@ public class MiSql
     }
     public void ComandoDelete()
     {
-        
+
     }
     /*
     public bool VerificarStringInList(List<string> tabelas, string tabelaSelecionada)

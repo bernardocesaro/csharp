@@ -1,9 +1,8 @@
-
 public static class Utilidades
 {
     public static void MostrarErro()
     {
-        Console.WriteLine("\nErro!");
+        Console.WriteLine("Erro...");
         Retornar();
     }
     public static void Retornar()

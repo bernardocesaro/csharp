@@ -1,94 +1,98 @@
+public enum TipoOpcao { Insert = 1, Select = 2, Update = 3, Delete = 4, Sair = 5 }
 
 public class Menu
 {
-    private readonly MiSql _miSql;
-    public Menu(MiSql miSql)
+    private readonly string _stringConexao;
+    public Menu(string stringConexao)
     {
-        _miSql = miSql;
+        _stringConexao = stringConexao;
     }
+    private readonly Dictionary<TipoOpcao, string> opcoesMenu = new Dictionary<TipoOpcao, string>()
+    {
+        { TipoOpcao.Insert, "1 - Insert dados" },
+        { TipoOpcao.Select, "2 - Select dados" },
+        { TipoOpcao.Update, "3 - Update dados" },
+        { TipoOpcao.Delete, "4 - Delete dados" },
+        { TipoOpcao.Sair  , "5 - Sair"         }
+    };
 
     public void Executar()
     {
+        bool conexaoEstabelecida = TestarConexao.AbrirFecharConexao(_stringConexao);
+
+        if(!conexaoEstabelecida)
+        {
+            return;
+        }
+
         while (true)
         {
             Console.Clear();
             MostrarMenu();
-            int opcaoSelecionadaValidada = PegarEValidarOpcao();
+            string? input = PegarOpcao();
+            TipoOpcao? opcaoValidada = ValidarOpcao(input);
 
-            if (!ProcessarOpcaoComando(opcaoSelecionadaValidada))
+            if (opcaoValidada.HasValue)
             {
-                break;
+                if (!ProcessarExecutarOpcao(opcaoValidada.Value))
+                {
+                    break;
+                }
+            }
+            else
+            {
+                Utilidades.MostrarErro();
             }
         }
     }
     private void MostrarMenu()
     {
-        string[] opcoesMenu =
-        {
-            "Menu MySql - Comandos",
-            "1 - Insert dados",
-            "2 - Select dados",
-            "3 - Update dados",
-            "4 - Delete dados",
-            "5 - Sair"
-        };
+        Console.WriteLine("Menu SQL - Comandos");
+
         foreach (var opcaoMenu in opcoesMenu)
         {
-            Console.WriteLine(opcaoMenu);
+		        Console.WriteLine(opcaoMenu.Value);
         }
-    }
-    private int PegarEValidarOpcao()
-    {
-        string? opcaoEscrita = PegarOpcao();
-        int? opcaoEscritaValidada = ValidarPegarOpcao(opcaoEscrita);
-        if (opcaoEscritaValidada != null)
-        {
-            return opcaoEscritaValidada.Value;
-        }
-        return 0;
     }
     private string? PegarOpcao()
     {
         Console.Write("Escolha uma opção: ");
         return Console.ReadLine();
     }
-    private int? ValidarPegarOpcao(string? opcaoEscrita)
+    private TipoOpcao? ValidarOpcao(string? input)
     {
-        opcaoEscrita = opcaoEscrita == null ? null : opcaoEscrita.Trim();
+        input = input == null ? null : input.Trim();
 
-        if (!int.TryParse(opcaoEscrita, out int opcaoSelecionada) || opcaoSelecionada < 1 || opcaoSelecionada > 5)
+        if (int.TryParse(input, out int opcaoValidada) && opcoesMenu.ContainsKey((TipoOpcao)opcaoValidada))
         {
-            Utilidades.MostrarErro();
-            return null;
+            return (TipoOpcao)opcaoValidada;
         }
-        return opcaoSelecionada;
+
+        return null;
     }
-    private bool ProcessarOpcaoComando(int opcaoSelecionadaValidada)
+
+    private bool ProcessarExecutarOpcao(TipoOpcao? opcaoValidada)
     {
         Console.Clear();
-        switch (opcaoSelecionadaValidada)
+        switch (opcaoValidada)
         {
-            case 0:
-                return true;
-            case 1:
+            case TipoOpcao.Insert:
                 Console.WriteLine("Executando INSERT\n");
-                _miSql.ExecutarComandoInsert();
                 return true;
-            case 2:
+            case TipoOpcao.Select:
                 Console.WriteLine("Executando SELECT\n");
-                _miSql.ExecutarComandoSelect();
                 return true;
-            case 3:
+            case TipoOpcao.Update:
                 Console.WriteLine("Executando UPDATE\n");
                 return true;
-            case 4:
+            case TipoOpcao.Delete:
                 Console.WriteLine("Executando DELETE\n");
                 return true;
-            case 5:
+            case TipoOpcao.Sair:
                 Console.WriteLine("Saindo...");
                 return false;
             default:
-                throw new InvalidOperationException ($"Opção inesperada: {opcaoSelecionadaValidada}");
+                return false;
         }
     }
 }

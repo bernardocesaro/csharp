@@ -1,15 +1,18 @@
-﻿
+﻿global using MySql.Data.MySqlClient;
+global using System.Text.RegularExpressions;
+global using System.Reflection;
+global using System.Collections.Generic;
+
 class Program
 {
     static void Main()
     {
         Console.Clear();
-        string stringConexao = GerenciarConexao.Executar();
+        string stringConexao = PegarConexao.Executar();
 
         try
         {
-            MiSql miSql = new MiSql(stringConexao);
-            Menu menu = new Menu(miSql);
+            Menu menu = new Menu(stringConexao);
 
             menu.Executar();
         }

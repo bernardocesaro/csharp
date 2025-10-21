@@ -1,7 +1,4 @@
-public class ComandoInsert : ComandoBaseSql
+public class ComandoInsert
 {
-    protected readonly string _stringConexao;
-    public ComandoInsert(string stringConexao) : base(stringConexao) { }
-
-    public override void Executar() {}
+    
 }

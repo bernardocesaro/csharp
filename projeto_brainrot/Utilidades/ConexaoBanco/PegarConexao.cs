@@ -14,10 +14,7 @@ public static class PegarConexao
             {
                 return AtribuirConexao(opcaoConexaoBancoValidada.Value);
             }
-            else
-            {
-                Utilidades.MostrarErro();
-            }
+            Utilidades.MostrarErro();
         }
     }
     private static string? EscolherConexao()
@@ -25,7 +22,6 @@ public static class PegarConexao
         Console.WriteLine("Deseja usar o banco Real (1) ou o banco Teste (2)?");
         return Console.ReadLine();
     }
-
     private static TipoConexao? ValidarConexao(string? input)
     {
         input = input == null ? null : input.Trim();
@@ -34,27 +30,25 @@ public static class PegarConexao
         {
             return (TipoConexao)opcaoConexaoBancoValidada;
         }
-
         return null;
     }
-
     private static string AtribuirConexao(TipoConexao opcaoConexaoBancoValidada)
     {
         const string STRING_TIPO_CONEXAO_REAL = "server=localhost;user=root;password=mysql_local1510;database=projeto_brainrot;";
         const string STRING_TIPO_CONEXAO_TESTE = "server=localhost;user=root;password=mysql_local1510;database=projeto_brainrot_teste;";
 
-        string stringConexao = STRING_TIPO_CONEXAO_TESTE;
-
         Console.WriteLine($"Opção Selecionada: {opcaoConexaoBancoValidada}");
         if (opcaoConexaoBancoValidada == TipoConexao.Real)
         {
-            stringConexao = STRING_TIPO_CONEXAO_REAL;
+            return STRING_TIPO_CONEXAO_REAL;
         }
         else if (opcaoConexaoBancoValidada == TipoConexao.Teste)
         {
-            stringConexao = STRING_TIPO_CONEXAO_TESTE;
+            return STRING_TIPO_CONEXAO_TESTE;
         }
-
-        return stringConexao;
+        else
+        {
+            return STRING_TIPO_CONEXAO_TESTE; // Só para caso venha adicionar + conexões, ai não vai dar erro
+        }
     }
 }

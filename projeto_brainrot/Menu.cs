@@ -3,10 +3,6 @@ public enum TipoOpcao { Insert = 1, Select = 2, Update = 3, Delete = 4, Sair = 5
 public class Menu
 {
     private readonly string _stringConexao;
-    public Menu(string stringConexao)
-    {
-        _stringConexao = stringConexao;
-    }
     private readonly Dictionary<TipoOpcao, string> opcoesMenu = new Dictionary<TipoOpcao, string>()
     {
         { TipoOpcao.Insert, "1 - Insert dados" },
@@ -15,12 +11,16 @@ public class Menu
         { TipoOpcao.Delete, "4 - Delete dados" },
         { TipoOpcao.Sair  , "5 - Sair"         }
     };
+    public Menu(string stringConexao)
+    {
+        _stringConexao = stringConexao;
+    }
 
     public void Executar()
     {
         bool conexaoEstabelecida = TestarConexao.AbrirFecharConexao(_stringConexao);
 
-        if(!conexaoEstabelecida)
+        if (!conexaoEstabelecida)
         {
             return;
         }
@@ -51,7 +51,7 @@ public class Menu
 
         foreach (var opcaoMenu in opcoesMenu)
         {
-		        Console.WriteLine(opcaoMenu.Value);
+            Console.WriteLine(opcaoMenu.Value);
         }
     }
     private string? PegarOpcao()
@@ -70,14 +70,20 @@ public class Menu
 
         return null;
     }
-
     private bool ProcessarExecutarOpcao(TipoOpcao? opcaoValidada)
     {
         Console.Clear();
+
+        BaseSql comando;
+        OpcaoTabela opcaoTabela = ConsultaTabelaECampos.PegarEValidarTabela();
+        List<string> camposTabelaSnakeCase = ConsultaTabelaECampos.PegarCamposEConverterToList(opcaoTabela);
+
         switch (opcaoValidada)
         {
             case TipoOpcao.Insert:
                 Console.WriteLine("Executando INSERT\n");
+                comando = new ComandoSelect(_stringConexao, opcaoTabela, camposTabelaSnakeCase);
+                comando.Executar();
                 return true;
             case TipoOpcao.Select:
                 Console.WriteLine("Executando SELECT\n");

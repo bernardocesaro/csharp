@@ -2,10 +2,10 @@
 global using System.Text.RegularExpressions;
 global using System.Reflection;
 global using System.Collections.Generic;
-
+global using System.Text;
 class Program
 {
-    static void Main()
+    public static void Main()
     {
         Console.Clear();
         string stringConexao = PegarConexao.Executar();

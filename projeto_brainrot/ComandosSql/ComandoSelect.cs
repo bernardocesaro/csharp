@@ -1,49 +1,42 @@
-public class ComandoSelect : ComandoBaseSql
+public class ComandoSelect : BaseSql
 {
-    protected readonly string _stringConexao;
-    public ComandoSelect(string stringConexao) : base(stringConexao) { }
+    public ComandoSelect(string stringConexao, OpcaoTabela opcaoTabela, List<string> camposTabelaSnakeCase) : base(stringConexao, opcaoTabela, camposTabelaSnakeCase) { }
 
     public override void Executar()
     {
         using (var conexao = TestarConexao.ConectarBanco(_stringConexao))
         {
-            Console.Clear();
-            OpcaoTabela tabelaValidada = PegarEValidarTabela();
+            string stringComando = CriarComando();
 
-            if (tabelaValidada == OpcaoTabela.Sair)
+            if (!Utilidades.Confirmar(_opcaoTabela))
             {
                 return;
             }
-            
-            List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada((tabelaValidada).ToString());
 
-            string stringComandoSelect = CriarComandoSelect(tabelaValidada.ToString(), camposTabelaSelecionada);
-
-            using (var comandoSelect = new MySqlCommand(stringComandoSelect, conexao))
+            using (var comandoSelect = new MySqlCommand(stringComando, conexao))
             using (var leitor = comandoSelect.ExecuteReader())
             {
                 Console.WriteLine("Trazendo dados");
                 Thread.Sleep(800);
                 Console.Clear();
 
-                MostrarSelect(leitor, tabelaValidada.ToString(), camposTabelaSelecionada);
+                MostrarSelect(leitor);
             }
         }
     }
-    private string CriarComandoSelect(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
+    protected override string CriarComando()
     {
-        string stringComandoSelect = $"SELECT {GerarCamposComandoSql(camposTabelaSelecionada)} FROM {tabelaSelecionadaValidada}";
+        //string stringComandoSelect = $"SELECT {_camposTabela} FROM {_opcaoTabela.ToString().ToLower()}";
         // Console.WriteLine($"\nO comando gerado foi esse: {stringComandoSelect}\n");
-
-        return stringComandoSelect;
+        return "";//stringComandoSelect;
     }
-    private void MostrarSelect(MySqlDataReader leitor, string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
+    private void MostrarSelect(MySqlDataReader leitor)
     {
-        Console.WriteLine($"Dados da tabela '{tabelaSelecionadaValidada}'");
+        Console.WriteLine($"Dados da tabela '{_opcaoTabela.ToString().ToLower()}'");
 
-        MostrarCamposSelect(camposTabelaSelecionada);
-        MostrarLinhaSeparadoraSelect(camposTabelaSelecionada);
-        MostrarDadosSelect(leitor, camposTabelaSelecionada);
+        //MostrarCamposSelect(camposTabelaSelecionada);
+        //MostrarLinhaSeparadoraSelect(camposTabelaSelecionada);
+        //MostrarDadosSelect(leitor, camposTabelaSelecionada);
 
         Console.WriteLine("\nMais nenhum resultado encontrado!");
         Utilidades.Retornar();

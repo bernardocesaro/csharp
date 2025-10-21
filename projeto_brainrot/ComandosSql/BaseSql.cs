@@ -1,75 +1,31 @@
-public enum OpcaoTabela { Conta = 1, Brainrot = 2, Sair = 3 }
-
-public abstract class ComandoBaseSql
+public abstract class BaseSql
 {
     protected readonly string _stringConexao;
-    protected readonly Dictionary<OpcaoTabela, Type> TabelasValidas = new Dictionary<OpcaoTabela, Type>()
-    {
-        { OpcaoTabela.Conta, typeof(Conta) },
-        { OpcaoTabela.Brainrot, typeof(Brainrot) },
-        { OpcaoTabela.Sair, typeof(string) }
-    };
-    protected Conta conta { get; set; } = new Conta();
-    protected Brainrot brainrot { get; set; } = new Brainrot();
-    public ComandoBaseSql(string stringConexao)
+    protected readonly OpcaoTabela _opcaoTabela;
+    protected readonly List<string> _camposTabelaSnakeCase;
+    public BaseSql(string stringConexao, OpcaoTabela opcaoTabela, List<string> camposTabelaSnakeCase)
     {
         _stringConexao = stringConexao;
+        _opcaoTabela = opcaoTabela;
+        _camposTabelaSnakeCase = camposTabelaSnakeCase;
     }
+    protected Conta conta { get; set; } = new Conta();
+    protected Brainrot brainrot { get; set; } = new Brainrot();
 
     public abstract void Executar();
-    protected OpcaoTabela PegarEValidarTabela()
-    {
-        while (true)
-        {
-            string? input = PegarTabela();
-            OpcaoTabela? tabelaValidada = ValidarTabela(input);
-            if (tabelaValidada.HasValue)
-            {
-                if (tabelaValidada.Value == OpcaoTabela.Sair)
-                {
-                    return tabelaValidada.Value;
-                }
-                Console.WriteLine("\nTabela validada com sucesso!\n");
-                Thread.Sleep(800);
-                Console.Clear();
-                return tabelaValidada.Value;
-            }
-            else
-            {
-                Utilidades.MostrarErro();
-            }
-        }
-    }
-    protected string? PegarTabela()
-    {
-        Console.WriteLine("Digite qual tabela deseja selecionar (Digite 'sair' para voltar ao menu): ");
-        return Console.ReadLine();
-    }
-    protected OpcaoTabela? ValidarTabela(string? input)
-    {
-        input = input == null ? null : input.Trim();
-
-        if (int.TryParse(input, out int tabelaValidada) && TabelasValidas.ContainsKey((OpcaoTabela)tabelaValidada))
-        {
-            return (OpcaoTabela)tabelaValidada;
-        }
-        return null;
-    }
-
-
-
-
+    protected abstract string CriarComando();
 
 
 
     public void ExecutarComandoInsert()
     {
+        /*
         using (var conexao = TestarConexao.ConectarBanco(_stringConexao))
         {
             Console.Clear();
 
             string tabelaSelecionadaValidada = PegarEValidarTabela().ToString(); // mudar depois
-            List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
+            List<string> camposTabelaSelecionada = PegarCamposTabela(tabelaValidada);
 
             PegarEValidarEAtribuirValoresCampos(tabelaSelecionadaValidada, camposTabelaSelecionada);
 
@@ -84,7 +40,7 @@ public abstract class ComandoBaseSql
                 {
                     case "conta":
                         propriedades = conta.GetType().GetProperties();
-                        /*
+                        
                         propriedades = propriedades.OrderBy(p => p.Name switch
                         {
                             "Id" => 0,
@@ -93,12 +49,12 @@ public abstract class ComandoBaseSql
                             "EspacosOcupados" => 3,
                             _ => 4
                         }).ToArray();
-                        */
+                        
                         instancia = conta;
                         break;
                     case "brainrot":
                         propriedades = brainrot.GetType().GetProperties();
-                        /*
+                        
                         propriedades = propriedades.OrderBy(p => p.Name switch
                         {
                             "Id" => 0,
@@ -108,7 +64,7 @@ public abstract class ComandoBaseSql
                             "Efeito" => 4,
                             _ => 5
                         }).ToArray();
-                        */
+                        
                         instancia = brainrot;
                         break;
                     default:
@@ -145,8 +101,10 @@ public abstract class ComandoBaseSql
                 }
             }
         }
+        */
     }
 
+     /*
     private string CriarComandoInsert(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
     {
         string stringComandoInsert = $"INSERT INTO {tabelaSelecionadaValidada} ({GerarCamposComandoSql(camposTabelaSelecionada)}) VALUES ({GerarParametrosComandoSql(camposTabelaSelecionada)})";
@@ -154,40 +112,8 @@ public abstract class ComandoBaseSql
 
         return stringComandoInsert;
     }
+    */
 
-
-    public List<string> PegarCamposTabelaSelecionada(string tabelaSelecionadaValidada)
-    {
-        List<string> camposTabelaSelecionada = new List<string>();
-
-        if (tabelaSelecionadaValidada == "conta")
-        {
-            camposTabelaSelecionada =
-            [
-                "Id",
-                "Nome",
-                "EspacosTotais",
-                "EspacosOcupados"
-            ];
-        }
-        else if (tabelaSelecionadaValidada == "brainrot")
-        {
-            camposTabelaSelecionada =
-            [
-                "Id",
-                "IdConta",
-                "Nome",
-                "Raridade",
-                "Efeito"
-            ];
-        }
-        else
-        {
-            throw new InvalidOperationException
-                ($"Tabela inesperada: {tabelaSelecionadaValidada}");
-        }
-        return camposTabelaSelecionada;
-    }
     private void PegarEValidarEAtribuirValoresCampos(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
     {
         foreach (string campo in camposTabelaSelecionada)
@@ -301,11 +227,7 @@ public abstract class ComandoBaseSql
                 return null;
         }
     }
-    public string GerarCamposComandoSql(List<string> camposTabelaSelecionada)
-    {
-        string camposSql = string.Join(", ", camposTabelaSelecionada);
-        return camposSql;
-    }
+    
     private string GerarParametrosComandoSql(List<string> camposTabelaSelecionada)
     {
         string camposSql = "@" + string.Join(", @", camposTabelaSelecionada);
@@ -315,26 +237,29 @@ public abstract class ComandoBaseSql
     // Select
     public void ExecutarComandoSelect()
     {
-        using (var conexao = TestarConexao.ConectarBanco(_stringConexao))
-        {
-            Console.Clear();
+        /*
+       using (var conexao = TestarConexao.ConectarBanco(_stringConexao))
+       {
+           Console.Clear();
 
-            string tabelaSelecionadaValidada = PegarEValidarTabela().ToString(); // mudar depois
-            List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
+           string tabelaSelecionadaValidada = PegarEValidarTabela().ToString(); // mudar depois
+           List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
 
-            string stringComandoSelect = CriarComandoSelect(tabelaSelecionadaValidada, camposTabelaSelecionada);
+           string stringComandoSelect = CriarComandoSelect(tabelaSelecionadaValidada, camposTabelaSelecionada);
 
-            using (var comandoSelect = new MySqlCommand(stringComandoSelect, conexao))
-            using (var leitor = comandoSelect.ExecuteReader())
-            {
-                Console.WriteLine("Trazendo dados");
-                Thread.Sleep(800);
-                Console.Clear();
+           using (var comandoSelect = new MySqlCommand(stringComandoSelect, conexao))
+           using (var leitor = comandoSelect.ExecuteReader())
+           {
+               Console.WriteLine("Trazendo dados");
+               Thread.Sleep(800);
+               Console.Clear();
 
-                MostrarSelect(leitor, tabelaSelecionadaValidada, camposTabelaSelecionada);
-            }
-        }
+               MostrarSelect(leitor, tabelaSelecionadaValidada, camposTabelaSelecionada);
+           }
+       }
+       */
     }
+    /*
     private string CriarComandoSelect(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
     {
         string stringComandoSelect = $"SELECT {GerarCamposComandoSql(camposTabelaSelecionada)} FROM {tabelaSelecionadaValidada}";
@@ -342,6 +267,7 @@ public abstract class ComandoBaseSql
 
         return stringComandoSelect;
     }
+    */
     private void MostrarSelect(MySqlDataReader leitor, string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
     {
         Console.WriteLine($"Dados da tabela '{tabelaSelecionadaValidada}'");

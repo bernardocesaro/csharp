@@ -34,10 +34,11 @@ public class Menu
 
             if (opcaoValidada.HasValue)
             {
-                if (!ProcessarExecutarOpcao(opcaoValidada.Value))
+                if (opcaoValidada == TipoOpcao.Sair)
                 {
                     break;
                 }
+                ProcessarExecutarOpcao(opcaoValidada.Value);
             }
             else
             {
@@ -75,18 +76,20 @@ public class Menu
         Console.Clear();
 
         BaseSql comando;
-        OpcaoTabela opcaoTabela = ConsultaTabelaECampos.PegarEValidarTabela();
-        List<string> camposTabelaSnakeCase = ConsultaTabelaECampos.PegarCamposEConverterToList(opcaoTabela);
+        OpcaoTabela opcaoTabela = CapturarTabelaECampos.PegarEValidarTabela();
+        List<string> camposTabelaSnakeCase = CapturarTabelaECampos.PegarCamposEConverterToList(opcaoTabela);
 
         switch (opcaoValidada)
         {
             case TipoOpcao.Insert:
                 Console.WriteLine("Executando INSERT\n");
-                comando = new ComandoSelect(_stringConexao, opcaoTabela, camposTabelaSnakeCase);
+                comando = new ComandoInsert(_stringConexao, opcaoTabela, camposTabelaSnakeCase);
                 comando.Executar();
                 return true;
             case TipoOpcao.Select:
                 Console.WriteLine("Executando SELECT\n");
+                comando = new ComandoSelect(_stringConexao, opcaoTabela, camposTabelaSnakeCase);
+                comando.Executar();
                 return true;
             case TipoOpcao.Update:
                 Console.WriteLine("Executando UPDATE\n");
@@ -94,9 +97,6 @@ public class Menu
             case TipoOpcao.Delete:
                 Console.WriteLine("Executando DELETE\n");
                 return true;
-            case TipoOpcao.Sair:
-                Console.WriteLine("Saindo...");
-                return false;
             default:
                 return false;
         }

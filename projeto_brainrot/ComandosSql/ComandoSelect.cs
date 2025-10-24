@@ -26,44 +26,45 @@ public class ComandoSelect : BaseSql
     }
     protected override string CriarComando()
     {
-        //string stringComandoSelect = $"SELECT {_camposTabela} FROM {_opcaoTabela.ToString().ToLower()}";
+        string stringComando = $"SELECT {ConverterUmParaDois.ConverterListToStringParametro(_camposTabelaSnakeCase, false)} " + 
+                               $"FROM {_opcaoTabela.ToString().ToLower()}";
         // Console.WriteLine($"\nO comando gerado foi esse: {stringComandoSelect}\n");
-        return "";//stringComandoSelect;
+        return stringComando;
     }
     private void MostrarSelect(MySqlDataReader leitor)
     {
         Console.WriteLine($"Dados da tabela '{_opcaoTabela.ToString().ToLower()}'");
 
-        //MostrarCamposSelect(camposTabelaSelecionada);
-        //MostrarLinhaSeparadoraSelect(camposTabelaSelecionada);
-        //MostrarDadosSelect(leitor, camposTabelaSelecionada);
+        MostrarCamposSelect();
+        MostrarLinhaSeparadoraSelect();
+        MostrarDadosSelect(leitor);
 
         Console.WriteLine("\nMais nenhum resultado encontrado!");
         Utilidades.Retornar();
     }
-    private void MostrarCamposSelect(List<string> camposTabelaSelecionada)
+    private void MostrarCamposSelect()
     {
-        for (int i = 0; i < camposTabelaSelecionada.Count; i++)
+        for (int i = 0; i < _camposTabelaSnakeCase.Count; i++)
         {
-            Console.Write("|" + $" {camposTabelaSelecionada[i],-15} ");
+            Console.Write("|" + $" {_camposTabelaSnakeCase[i],-15} ");
         }
         Console.Write("|\n");
     }
-    private void MostrarLinhaSeparadoraSelect(List<string> camposTabelaSelecionada)
+    private void MostrarLinhaSeparadoraSelect()
     {
-        for (int i = 0; i < camposTabelaSelecionada.Count; i++)
+        for (int i = 0; i < _camposTabelaSnakeCase.Count; i++)
         {
             Console.Write("|" + $"=================");
         }
         Console.Write("|\n");
     }
-    private void MostrarDadosSelect(MySqlDataReader leitor, List<string> camposTabelaSelecionada)
+    private void MostrarDadosSelect(MySqlDataReader leitor)
     {
         while (leitor.Read())
         {
-            for (int i = 0; i < camposTabelaSelecionada.Count; i++)
+            for (int i = 0; i < _camposTabelaSnakeCase.Count; i++)
             {
-                Console.Write($"| {leitor[$"{camposTabelaSelecionada[i]}"],-15} ");
+                Console.Write($"| {leitor[$"{_camposTabelaSnakeCase[i]}"],-15} ");
             }
             Console.Write("|\n");
         }

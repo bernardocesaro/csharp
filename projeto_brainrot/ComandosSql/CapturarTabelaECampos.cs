@@ -1,4 +1,4 @@
-public static class ConsultaTabelaECampos
+public static class CapturarTabelaECampos
 {
     public static OpcaoTabela PegarEValidarTabela()
     {
@@ -53,7 +53,7 @@ public static class ConsultaTabelaECampos
 
         foreach (PropertyInfo propInfo in camposTabela)
         {
-            camposSnakeCase.Add(Utilidades.ConverterPascalToSnakeCase(propInfo.Name));
+            camposSnakeCase.Add(ConverterUmParaDois.ConverterPascalToSnakeCase(propInfo.Name));
         }
         return camposSnakeCase;
     }

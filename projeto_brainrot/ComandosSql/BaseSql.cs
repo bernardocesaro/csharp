@@ -15,8 +15,6 @@ public abstract class BaseSql
     public abstract void Executar();
     protected abstract string CriarComando();
 
-
-
     public void ExecutarComandoInsert()
     {
         /*
@@ -228,93 +226,6 @@ public abstract class BaseSql
         }
     }
     
-    private string GerarParametrosComandoSql(List<string> camposTabelaSelecionada)
-    {
-        string camposSql = "@" + string.Join(", @", camposTabelaSelecionada);
-        return camposSql;
-    }
-
-    // Select
-    public void ExecutarComandoSelect()
-    {
-        /*
-       using (var conexao = TestarConexao.ConectarBanco(_stringConexao))
-       {
-           Console.Clear();
-
-           string tabelaSelecionadaValidada = PegarEValidarTabela().ToString(); // mudar depois
-           List<string> camposTabelaSelecionada = PegarCamposTabelaSelecionada(tabelaSelecionadaValidada);
-
-           string stringComandoSelect = CriarComandoSelect(tabelaSelecionadaValidada, camposTabelaSelecionada);
-
-           using (var comandoSelect = new MySqlCommand(stringComandoSelect, conexao))
-           using (var leitor = comandoSelect.ExecuteReader())
-           {
-               Console.WriteLine("Trazendo dados");
-               Thread.Sleep(800);
-               Console.Clear();
-
-               MostrarSelect(leitor, tabelaSelecionadaValidada, camposTabelaSelecionada);
-           }
-       }
-       */
-    }
-    /*
-    private string CriarComandoSelect(string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
-    {
-        string stringComandoSelect = $"SELECT {GerarCamposComandoSql(camposTabelaSelecionada)} FROM {tabelaSelecionadaValidada}";
-        // Console.WriteLine($"\nO comando gerado foi esse: {stringComandoSelect}\n");
-
-        return stringComandoSelect;
-    }
-    */
-    private void MostrarSelect(MySqlDataReader leitor, string tabelaSelecionadaValidada, List<string> camposTabelaSelecionada)
-    {
-        Console.WriteLine($"Dados da tabela '{tabelaSelecionadaValidada}'");
-
-        MostrarCamposSelect(camposTabelaSelecionada);
-        MostrarLinhaSeparadoraSelect(camposTabelaSelecionada);
-        MostrarDadosSelect(leitor, camposTabelaSelecionada);
-
-        Console.WriteLine("\nMais nenhum resultado encontrado!");
-        Utilidades.Retornar();
-    }
-    private void MostrarCamposSelect(List<string> camposTabelaSelecionada)
-    {
-        for (int i = 0; i < camposTabelaSelecionada.Count; i++)
-        {
-            Console.Write("|" + $" {camposTabelaSelecionada[i],-15} ");
-        }
-        Console.Write("|\n");
-    }
-    private void MostrarLinhaSeparadoraSelect(List<string> camposTabelaSelecionada)
-    {
-        for (int i = 0; i < camposTabelaSelecionada.Count; i++)
-        {
-            Console.Write("|" + $"=================");
-        }
-        Console.Write("|\n");
-    }
-    private void MostrarDadosSelect(MySqlDataReader leitor, List<string> camposTabelaSelecionada)
-    {
-        while (leitor.Read())
-        {
-            for (int i = 0; i < camposTabelaSelecionada.Count; i++)
-            {
-                Console.Write($"| {leitor[$"{camposTabelaSelecionada[i]}"],-15} ");
-            }
-            Console.Write("|\n");
-        }
-    }
-
-    public void ComandoUpdate()
-    {
-
-    }
-    public void ComandoDelete()
-    {
-
-    }
     /*
     public bool VerificarStringInList(List<string> tabelas, string tabelaSelecionada)
     {

@@ -1,3 +1,28 @@
-# Ignora pastas de build e temporárias
-[Bb]in/
+# Arquivos Binários e de Debug (geralmente gerados)
+# Ignora arquivos .dll, .exe e .pdb em qualquer lugar do projeto
+*.dll
+*.exe
+*.pdb
+
+# Pastas de Saída Comum da Compilação (Visual Studio/Ambientes .NET)
+# Ignora a pasta 'bin/' e todo seu conteúdo
+[Bb]in/ 
+# Ignora a pasta 'obj/' e todo seu conteúdo
 [Oo]bj/
+
+# Arquivos de usuário e soluções do Visual Studio que não devem ser compartilhados
+*.suo
+*.user
+*.config
+projeto_brainrot/bin/Debug/net8.0/projeto_brainrot.dll
+projeto_brainrot/bin/Debug/net8.0/projeto_brainrot.dll
+projeto_brainrot/bin/Debug/net8.0/projeto_brainrot.exe
+projeto_brainrot/bin/Debug/net8.0/projeto_brainrot.pdb
+projeto_brainrot/obj/Debug/net8.0/apphost.exe
+projeto_brainrot/obj/Debug/net8.0/projeto_brainrot.AssemblyInfo.cs
+projeto_brainrot/obj/Debug/net8.0/projeto_brainrot.AssemblyInfoInputs.cache
+projeto_brainrot/obj/Debug/net8.0/projeto_brainrot.csproj.CoreCompileInputs.cache
+projeto_brainrot/obj/Debug/net8.0/projeto_brainrot.dll
+projeto_brainrot/obj/Debug/net8.0/projeto_brainrot.pdb
+projeto_brainrot/obj/Debug/net8.0/ref/projeto_brainrot.dll
+projeto_brainrot/obj/Debug/net8.0/refint/projeto_brainrot.dll

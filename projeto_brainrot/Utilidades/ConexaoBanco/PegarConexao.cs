@@ -19,7 +19,7 @@ public static class PegarConexao
     }
     private static string? EscolherConexao()
     {
-        Console.WriteLine("Deseja usar o banco Real (1) ou o banco Teste (2)?");
+        Console.Write("Deseja usar o banco Real (1) ou o banco Teste (2)? ");
         return Console.ReadLine();
     }
     private static TipoConexao? ValidarConexao(string? input)
